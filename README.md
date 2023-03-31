@@ -1,1 +1,19 @@
 # I hate 1 file restrictions
+The idea is simple:
+* You have your c file with the needed libraries included.
+* You have a 1 file restriction.
+* The script replaces the imports with the headers and appends the code at the
+  end (yes, this is just a static linker)
+
+## How
+The script searches in the imports and replaces every `import "something.h"`
+with the contents of the file `something.h`. If its not found, it also 
+searches in `CPATH`.  
+_it **SHOULD** be runned in the same directory as the c file_
+
+## Usage
+(the script has a help function, use it)
+```sh
+python3 prepreprocessor.py input_file output_file
+```
+
