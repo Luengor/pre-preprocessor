@@ -7,10 +7,9 @@ import re
 
 ## Constants
 TEXTS = {
-    "usage": "Usage: {0} <input> <output>".format(argv[0]),
-    "noinput": "Input file {0} does not exist.".format(argv[1]),
+    "usage": "Usage: {0} <input> <output>",
+    "noinput": "Input file {0} does not exist.",
     "missing_include": "Include file {0} is missing or lacks source",
-    "help": ""
 }
 
 class ERROR_CODES (Enum):
@@ -24,11 +23,11 @@ class ERROR_CODES (Enum):
 if __name__ == "__main__":
     # Check args
     if (len(argv) != 3):
-        print(TEXTS["usage"])
+        print(TEXTS["usage"].format(argv[0]))
         exit(ERROR_CODES.INVALID_ARGS.value)
 
     if not os.path.exists(argv[1]):
-        print(TEXTS["noinput"])
+        print(TEXTS["noinput"].format(argv[1]))
         exit(ERROR_CODES.FILE_DOESNT_EXIST.value)
 
     
