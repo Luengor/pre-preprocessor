@@ -12,7 +12,6 @@ searches in `CPATH`.
 _it **SHOULD** be runned in the same directory as the c file_
 
 ## Usage
-(the script has a help function, use it)
 ```sh
 python3 prepreprocessor.py input_file output_file
 ```
