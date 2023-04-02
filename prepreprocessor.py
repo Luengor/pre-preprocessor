@@ -64,7 +64,7 @@ if __name__ == "__main__":
         # Take any includes "" out for now
         source = files["source"]
         file += f"/// Start of {headername} source\n"
-        file += re.sub(rf'(#include[ ]*\".+\")[ ]*\n', r'// \1', source)
+        file += re.sub(rf'(#include[ ]*\".+\")[ ]*', r'// \1', source)
         file += f"/// End of {headername} source\n"
 
     # Write file
