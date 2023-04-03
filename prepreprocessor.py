@@ -36,23 +36,37 @@ if __name__ == "__main__":
         file = f.read()
     needed = re.findall(r"#include[ ]*\"(.+)\"", file, re.MULTILINE)
 
+    search_paths = ["./"]
+    cpath = os.getenv("CPATH")
+    if cpath != None:
+        search_paths += cpath.split(':')
+
     # Check if the needed files (and the sources) exists (and get them) 
     files = {} 
     for header_file in needed:
         source_file = header_file.replace('.h', '.c') 
 
-        # Check if files exits
-        if (not os.path.exists(header_file) or \
-                not os.path.exists(source_file)):
+        # Search for file
+        for spath in search_paths:
+            full_header_file = os.path.join(spath, header_file)
+            full_source_file = os.path.join(spath, source_file)
+
+            if (os.path.exists(full_header_file) and
+                    os.path.exists(full_source_file)):
+                # Load them
+                files[header_file] = {} 
+                with open(full_header_file) as f:
+                    files[header_file]["header"] = f.read()
+                with open(full_source_file) as f:
+                    files[header_file]["source"] = f.read()
+
+                # Exit
+                break;
+
+        # Check if files have been found
+        if header_file not in files.keys():
             print(TEXTS["missing_include"].format(header_file))
             exit(ERROR_CODES.MISSING_INCLUDE.value)
-
-        # Load files
-        files[header_file] = {} 
-        with open(header_file) as f:
-            files[header_file]["header"] = f.read()
-        with open(source_file) as f:
-            files[header_file]["source"] = f.read()
 
     # They exist, do the replacement
     for headername, files in files.items():
