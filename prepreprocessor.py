@@ -18,17 +18,10 @@ class error_code (Enum):
     MISSING_INCLUDE = 3
 
 # Does the actual prepreprocessing'==>
-def prepreprocess(filename:str) -> Tuple[error_code, str]:
-    # Check if main file exists
-    if not os.path.exists(filename):
-        return (error_code.FILE_DOESNT_EXIST, '')
-
-    # Run over the file, noting the files needed
-    with open(filename, 'r') as f:
-        file = f.read()
+def prepreprocess(file:str, filepath:str) -> Tuple[error_code, str]:
     needed = re.findall(r"#include[ ]*\"(.+)\"", file, re.MULTILINE)
 
-    search_paths = [os.path.dirname(filename)]
+    search_paths = [filepath]
     cpath = os.getenv("CPATH")
     if cpath != None:
         search_paths += cpath.split(':')
@@ -57,7 +50,6 @@ def prepreprocess(filename:str) -> Tuple[error_code, str]:
 
         # Check if files have been found
         if header_file not in files.keys():
-            print(TEXTS["missing_include"].format(header_file))
             return (error_code.MISSING_INCLUDE, '')
 
     # They exist, do the replacement
@@ -65,13 +57,22 @@ def prepreprocess(filename:str) -> Tuple[error_code, str]:
         # "Import" the header
         header = files["header"]
         file = re.sub(rf'(#include[ ]*\"{headername}\")',
-                      rf"///Start of {headername}\n{header}\n///End of {headername}\n", file) 
+                      rf"///Start of {headername}\n{prepreprocess(header, os.path.dirname(headername))}\n///End of {headername}\n", file) 
 
-        # Take any includes "" out for now
+        # Dont re-include the file 
         source = files["source"]
+        headername_real = headername.split('/')[-1]
+
+        clean_source = re.sub(rf'#(include[ ]*\"{headername_real}\")[ ]*', r'// \1', source)
+        status, clean_source = prepreprocess(clean_source, os.path.dirname(headername));
+        if status != error_code.OK:
+            return (status, '')
+
         file += f"/// Start of {headername} source\n"
-        file += re.sub(rf'(#include[ ]*\".+\")[ ]*', r'// \1', source)
+        file += clean_source 
         file += f"/// End of {headername} source\n"
+
+        
 
 
     # Return the file
@@ -84,7 +85,15 @@ if __name__ == "__main__":
         print(TEXTS["usage"].format(argv[0]))
         exit(error_code.INVALID_ARGS.value)
 
-    status, file = prepreprocess(argv[1])
+    # Check if main file exists
+    if not os.path.exists(argv[1]):
+        exit(error_code.FILE_DOESNT_EXIST.value)
+
+    # Run over the file, noting the files needed
+    with open(argv[1], 'r') as f:
+        file = f.read()
+
+    status, file = prepreprocess(file, os.path.dirname(argv[1]))
 
     if not status == error_code.OK:
         print(f"no ({status})")
