@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 ## Imports
+from typing import Tuple 
 from sys import argv
 from enum import Enum
 import os
@@ -8,35 +9,26 @@ import re
 ## Constants
 TEXTS = {
     "usage": "Usage: {0} <input> <output>",
-    "noinput": "Input file {0} does not exist.",
-    "missing_include": "Include file {0} is missing or lacks source",
 }
 
-class ERROR_CODES (Enum):
+class error_code (Enum):
     OK = 0
     INVALID_ARGS = 1
     FILE_DOESNT_EXIST = 2
     MISSING_INCLUDE = 3
 
+# Does the actual prepreprocessing'==>
+def prepreprocess(filename:str) -> Tuple[error_code, str]:
+    # Check if main file exists
+    if not os.path.exists(filename):
+        return (error_code.FILE_DOESNT_EXIST, '')
 
-
-if __name__ == "__main__":
-    # Check args
-    if (len(argv) != 3):
-        print(TEXTS["usage"].format(argv[0]))
-        exit(ERROR_CODES.INVALID_ARGS.value)
-
-    if not os.path.exists(argv[1]):
-        print(TEXTS["noinput"].format(argv[1]))
-        exit(ERROR_CODES.FILE_DOESNT_EXIST.value)
-
-    
     # Run over the file, noting the files needed
-    with open(argv[1], 'r') as f:
+    with open(filename, 'r') as f:
         file = f.read()
     needed = re.findall(r"#include[ ]*\"(.+)\"", file, re.MULTILINE)
 
-    search_paths = ["./"]
+    search_paths = [os.path.dirname(filename)]
     cpath = os.getenv("CPATH")
     if cpath != None:
         search_paths += cpath.split(':')
@@ -66,7 +58,7 @@ if __name__ == "__main__":
         # Check if files have been found
         if header_file not in files.keys():
             print(TEXTS["missing_include"].format(header_file))
-            exit(ERROR_CODES.MISSING_INCLUDE.value)
+            return (error_code.MISSING_INCLUDE, '')
 
     # They exist, do the replacement
     for headername, files in files.items():
@@ -81,7 +73,25 @@ if __name__ == "__main__":
         file += re.sub(rf'(#include[ ]*\".+\")[ ]*', r'// \1', source)
         file += f"/// End of {headername} source\n"
 
+
+    # Return the file
+    return (error_code.OK, file);
+# <=='
+
+if __name__ == "__main__":
+    # Check args
+    if (len(argv) != 3):
+        print(TEXTS["usage"].format(argv[0]))
+        exit(error_code.INVALID_ARGS.value)
+
+    status, file = prepreprocess(argv[1])
+
+    if not status == error_code.OK:
+        print(f"no ({status})")
+        exit(status.value)
+
     # Write file
     with open(argv[2], "w") as f:
         f.write(file)
+
 

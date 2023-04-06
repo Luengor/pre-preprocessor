@@ -9,7 +9,6 @@ The idea is simple:
 The script searches in the imports and replaces every `import "something.h"`
 with the contents of the file `something.h`. If its not found, it also 
 searches in `CPATH`.  
-_it **SHOULD** be run in the same directory as the c file_
 
 ## Usage
 ```sh
