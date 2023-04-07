@@ -56,8 +56,12 @@ def prepreprocess(file:str, filepath:str) -> Tuple[error_code, str]:
     for headername, files in files.items():
         # "Import" the header
         header = files["header"]
+        status, clean_header = prepreprocess(header, os.path.dirname(headername));
+        if status != error_code.OK:
+            return (status, '')
+
         file = re.sub(rf'(#include[ ]*\"{headername}\")',
-                      rf"///Start of {headername}\n{prepreprocess(header, os.path.dirname(headername))}\n///End of {headername}\n", file) 
+                      rf"///Start of {headername}\n{clean_header}\n///End of {headername}\n", file) 
 
         # Dont re-include the file 
         source = files["source"]
