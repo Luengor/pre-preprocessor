@@ -61,7 +61,7 @@ def prepreprocess(file:str, filepath:str) -> Tuple[error_code, str]:
             return (status, '')
 
         file = re.sub(rf'(#include[ ]*\"{headername}\")',
-                      rf"///Start of {headername}\n{clean_header}\n///End of {headername}\n", file) 
+                      lambda _: f"///Start of {headername}\n{clean_header}\n///End of {headername}\n" , file) 
 
         # Dont re-include the file 
         source = files["source"]
