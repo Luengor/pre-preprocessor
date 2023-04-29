@@ -40,9 +40,9 @@ def prepreprocess(file:str, filepath:str) -> Tuple[error_code, str]:
                     os.path.exists(full_source_file)):
                 # Load them
                 files[header_file] = {} 
-                with open(full_header_file) as f:
+                with open(full_header_file, 'r') as f:
                     files[header_file]["header"] = f.read()
-                with open(full_source_file) as f:
+                with open(full_source_file, 'r') as f:
                     files[header_file]["source"] = f.read()
 
                 # Exit
