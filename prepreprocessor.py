@@ -8,7 +8,7 @@ import re
 
 ## Constants
 TEXTS = {
-    "usage": "Usage: {0} <input> <output>",
+    "usage": "Usage: {0} <input> [output]",
 }
 
 class error_code (Enum):
@@ -85,7 +85,7 @@ def prepreprocess(file:str, filepath:str) -> Tuple[error_code, str]:
 
 if __name__ == "__main__":
     # Check args
-    if (len(argv) != 3):
+    if (len(argv) not in (2, 3)):
         print(TEXTS["usage"].format(argv[0]))
         exit(error_code.INVALID_ARGS.value)
 
@@ -104,7 +104,9 @@ if __name__ == "__main__":
         exit(status.value)
 
     # Write file
-    with open(argv[2], "w") as f:
-        f.write(file)
-
+    if len(argv) == 2:
+        print(file)
+    else:
+        with open(argv[2], "w") as f:
+            f.write(file)
 

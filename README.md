@@ -12,6 +12,6 @@ searches in `CPATH`.
 
 ## Usage
 ```sh
-python3 prepreprocessor.py input_file output_file
+python3 prepreprocessor.py input_file [output_file]
 ```
 
